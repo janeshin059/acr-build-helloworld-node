@@ -3,6 +3,7 @@ name: Linux_Container_Workflow
 
 env:
   IMAGE_NAME: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ github.repository }}:${{ github.sha }}
+  IMAGE_PATH: Dockerfile
 
 jobs:
     build-and-scan-deploy:
@@ -13,19 +14,32 @@ jobs:
           uses: actions/checkout@main
 
 
-        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
-          run: |
-            curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
-            chmod a+x ./twistcli
+        # - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
+        #   run: |
+        #     curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
+        #     chmod a+x ./twistcli
 
 
         - name: Build the image
           run: |
             docker build -t $IMAGE_NAME .
       
-        - name: Scan the image
-          run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
+        # - name: Scan the image
+        #   run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
         
+
+        - name: Run Checkov action
+          id: checkov
+          uses: bridgecrewio/checkov-action@master
+          with:
+            quiet: true # optional: display only failed checks
+            soft_fail: true # optional: do not return an error code if there are failed checks
+            log_level: DEBUG # optional: set log level. Default WARNING
+            docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
+            dockerfile_path: ${{ format('{0}/Dockerfile', env.IMAGE_PATH) }} # path to the Dockerfile
+            # container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
+            api-key: ${{ secrets.BC_API_KEY }} # Bridgecrew API key stored as a GitHub secret
+
 
         - name: 'Login via Azure CLI'
           uses: azure/login@v1
