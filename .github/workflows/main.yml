@@ -11,16 +11,21 @@ jobs:
         # checkout the repo
         - name: 'Checkout GitHub Action'
           uses: actions/checkout@main
-        - name: Download twistcli from the Prisma Cloud Compute Console
+
+
+        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
           run: |
             curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
             chmod a+x ./twistcli
+
+
         - name: Build the image
           run: |
             docker build -t $IMAGE_NAME .
       
         - name: Scan the image
           run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
+        
 
         - name: 'Login via Azure CLI'
           uses: azure/login@v1
