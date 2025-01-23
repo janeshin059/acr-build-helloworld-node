@@ -13,7 +13,6 @@ jobs:
         - name: 'Checkout GitHub Action'
           uses: actions/checkout@main
 
-
         - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
           run: |
             curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
