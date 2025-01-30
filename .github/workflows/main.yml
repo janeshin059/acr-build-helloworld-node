@@ -27,14 +27,14 @@ jobs:
         - name: Build the image
           run: |
             docker build -t $IMAGE_NAME .
+            docker save $IMAGE_NAME > dockerimage.tar
       
         # - name: Scan the image
         #   run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
         
         - name: Cortex scan
           run: |
-            docker save $IMAGE_NAME > dockerimage.tar
-            sudo ./cortexcli --api-base-url ${{ secrets.CORTEX_API_URL }} --api-key "${{secrets.CORTEX_API_KEY}}" --xdr-auth-id 1 image scan dockerimage.tar
+            sudo ./cortexcli --api-base-url https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com --api-key ${{ secrets.CORTEX_API_KEY }} --xdr-auth-id 1 image scan dockerimage.tar
 
         # - name: Run Checkov action
         #   id: checkov
