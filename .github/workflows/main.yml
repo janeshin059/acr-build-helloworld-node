@@ -34,7 +34,7 @@ jobs:
         
         - name: Cortex scan
           run: |
-            ./cortexcli image scan dockerimage.tar --api-key ${{ secrets.CORTEX_API_KEY }} --api-base-url https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com --xdr-auth-id ${{ secrets.CORTEX_API_KEY }}
+            ./cortexcli --api-key ${{ secrets.CORTEX_API_KEY }} --api-base-url https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com --xdr-auth-id ${{ secrets.CORTEX_API_KEY }} image scan dockerimage.tar
 
         # - name: Run Checkov action
         #   id: checkov
