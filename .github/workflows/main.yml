@@ -22,7 +22,6 @@ jobs:
         - name: Download Cortex CLI
           run: |
             curl -s -o cortexcli $(curl -s "https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com/public_api/cwp/releases/cortexcli/download-link?os=linux&architecture=amd64" -H "x-xdr-auth-id: 1" -H "Authorization: ${{secrets.CORTEX_API_KEY}}" | jq -r '.signed_url') 
-               |
             chmod +x cortexcli
 
         - name: Build the image
@@ -34,7 +33,6 @@ jobs:
         
         - name: Cortex scan
           run: |
-            chmod +x cortexcli
             docker save  -o $IMAGE_NAME.tar $IMAGE_NAME
             sudo ./cortexcli --api-base-url "https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com" --api-key "${{secrets.CORTEX_API_KEY}}" --xdr-auth-id 1 image scan --name $IMAGE_NAME
 
