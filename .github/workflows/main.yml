@@ -24,18 +24,17 @@ jobs:
             curl -s -o cortexcli $(curl -s "https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com/public_api/cwp/releases/cortexcli/download-link?os=linux&architecture=amd64" -H "x-xdr-auth-id: 1" -H "Authorization: ${{secrets.CORTEX_API_KEY}}" | jq -r '.signed_url') 
             chmod +x cortexcli
        
-
         - name: Build the image
           run: |
             docker build -t $IMAGE_NAME .
             docker save $IMAGE_NAME > dockerimage.tar
+
+        - name: Cortex scan
+          run: |
+            sudo ./cortexcli --api-base-url https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com --api-key ${{ secrets.CORTEX_API_KEY }} --xdr-auth-id 1 image scan dockerimage.tar
       
         # - name: Scan the image
         #   run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
-        
-        - name: Cortex scan
-          run: |
-            ./cortexcli --xdr-auth-id 1 --api-key ${{ secrets.CORTEX_API_KEY }} --api-base-url https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com image scan dockerimage.tar
 
         # - name: Run Checkov action
         #   id: checkov
