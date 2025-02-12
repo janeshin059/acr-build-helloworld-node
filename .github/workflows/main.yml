@@ -33,7 +33,7 @@ jobs:
        
         - name: Build the image
           run: |
-            docker build -t jashin .
+            docker build -t $IMAGE_NAME .
           #  docker save $IMAGE_NAME > dockerimage.tar
 
         # - name: Cortex scan
@@ -69,8 +69,8 @@ jobs:
           #   ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
           #   IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
           run: |
-            docker tag jashin:latest 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/jashin:latest.
-            docker push 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/jashin:latest
+            docker tag $IMAGE_NAME 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/$IMAGE_NAME.
+            docker push 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/$IMAGE_NAME
 
 
         # ----------------- AZURE --------------------
