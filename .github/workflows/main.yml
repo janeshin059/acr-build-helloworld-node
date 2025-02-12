@@ -3,7 +3,7 @@ name: Linux_Container_Workflow
 
 env:
   AWS_REGION: ap-northeast-2                   
-  ECR_REPOSITORY: jashin
+  ECR_REPOSITORY: aws-webapp
   IMAGE_PATH: Dockerfile
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
@@ -58,11 +58,8 @@ jobs:
             PRISMA_API_URL: https://api4.prismacloud.io
 
 
-     
-
         - name: Push the image to Amazon ECR
           id: build-image
           run: |
-  
             docker push $IMAGE_NAME
 
