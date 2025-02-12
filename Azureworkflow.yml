@@ -1,0 +1,101 @@
+on: [push, workflow_dispatch]
+name: Linux_Container_Workflow
+
+env:
+  # IMAGE_NAME: ${{ secrets.REGISTRY_LOGIN_SERVER }}/${{ github.repository }}:${{ github.sha }}
+  IMAGE_NAME: ${{ github.repository }}:${{ github.sha }}
+  IMAGE_PATH: Dockerfile
+
+jobs:
+    build-and-scan-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ap-northeast-1
+
+        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
+          run: |
+            curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
+            chmod a+x ./twistcli
+
+        # - name: Download Cortex CLI
+        #   run: |
+        #     curl -s -o cortexcli $(curl -s "https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com/public_api/cwp/releases/cortexcli/download-link?os=linux&architecture=amd64" -H "x-xdr-auth-id: 1" -H "Authorization: ${{secrets.CORTEX_API_KEY}}" | jq -r '.signed_url') 
+        #     chmod +x cortexcli
+       
+        - name: Build the image
+          run: |
+            docker build -t $IMAGE_NAME .
+          #  docker save $IMAGE_NAME > dockerimage.tar
+
+        # - name: Cortex scan
+        #   run: |
+        #     sudo ./cortexcli --api-base-url https://api-japac-sa-beta.xdr.pr.paloaltonetworks.com --api-key ${{ secrets.CORTEX_API_KEY }} --xdr-auth-id 1 image scan dockerimage.tar
+      
+        - name: Scan the image
+          run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
+
+        - name: Run Checkov action
+          id: checkov
+          uses: bridgecrewio/checkov-action@master
+          with:
+            quiet: true # optional: display only failed checks
+            soft_fail: true # optional: do not return an error code if there are failed checks
+            log_level: DEBUG # optional: set log level. Default WARNING
+            docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
+            dockerfile_path: Dockerfile # path to the Dockerfile
+            # container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
+            api-key: ${{ secrets.BC_API_KEY }} # Bridgecrew API key stored as a GitHub secret
+          env:
+            PRISMA_API_URL: https://api4.prismacloud.io
+
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+
+        - name: Build, tag, and push the image to Amazon ECR
+          id: build-image
+          # env:
+          #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          #   ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+          #   IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
+          run: |
+            docker tag $IMAGE_NAME 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/$IMAGE_NAME.
+            docker push 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/$IMAGE_NAME
+
+
+        # ----------------- AZURE --------------------
+        # - name: 'Login via Azure CLI'
+        #   uses: azure/login@v1
+        #   with:
+        #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+        # - name: 'Push image'
+        #   uses: azure/docker-login@v1
+        #   with:
+        #     login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        #     username: ${{ secrets.REGISTRY_USERNAME }}
+        #     password: ${{ secrets.REGISTRY_PASSWORD }}
+        # - run: |
+        #     docker push $IMAGE_NAME
+
+        # - name: 'Deploy to Azure Container Instances'
+        #   uses: 'azure/aci-deploy@v1'
+        #   with:
+        #     resource-group: ${{ secrets.RESOURCE_GROUP }}
+        #     dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+        #     image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
+        #     registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        #     registry-username: ${{ secrets.REGISTRY_USERNAME }}
+        #     registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+        #     name: aci-sampleapp
+        #     location: 'west us'
