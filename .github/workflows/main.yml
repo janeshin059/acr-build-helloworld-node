@@ -33,7 +33,7 @@ jobs:
        
         - name: Build the image
           run: |
-            docker build -t $IMAGE_NAME .
+            docker build -t jashin .
           #  docker save $IMAGE_NAME > dockerimage.tar
 
         # - name: Cortex scan
