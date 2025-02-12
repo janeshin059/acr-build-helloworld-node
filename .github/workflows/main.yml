@@ -3,11 +3,11 @@ name: Linux_Container_Workflow
 
 env:
   AWS_REGION: ap-northeast-2                   
-  ECR_REPOSITORY: aws-webapp
+  # ECR_REPOSITORY: aws-webapp
   IMAGE_PATH: Dockerfile
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
-  IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com:${{ github.sha }}
+  IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
 
 jobs:
     build-and-scan-deploy:
@@ -32,8 +32,6 @@ jobs:
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
-
-
 
         - name: Build and Scan the image
           # env:
