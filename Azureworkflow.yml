@@ -14,12 +14,7 @@ jobs:
         - name: 'Checkout GitHub Action'
           uses: actions/checkout@main
 
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ap-northeast-1
+
 
         - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
           run: |
@@ -58,44 +53,29 @@ jobs:
             PRISMA_API_URL: https://api4.prismacloud.io
 
 
-        - name: Login to Amazon ECR
-          id: login-ecr
-          uses: aws-actions/amazon-ecr-login@v1
-
-        - name: Build, tag, and push the image to Amazon ECR
-          id: build-image
-          # env:
-          #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          #   ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-          #   IMAGE_TAG: ${{ steps.get-commit-hash.outputs.commit-hash }}-${{ steps.get-timestamp.outputs.timestamp }}
-          run: |
-            docker tag $IMAGE_NAME 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/$IMAGE_NAME.
-            docker push 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/$IMAGE_NAME
-
-
         # ----------------- AZURE --------------------
-        # - name: 'Login via Azure CLI'
-        #   uses: azure/login@v1
-        #   with:
-        #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
         
-        # - name: 'Push image'
-        #   uses: azure/docker-login@v1
-        #   with:
-        #     login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        #     username: ${{ secrets.REGISTRY_USERNAME }}
-        #     password: ${{ secrets.REGISTRY_PASSWORD }}
-        # - run: |
-        #     docker push $IMAGE_NAME
+        - name: 'Push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+        - run: |
+            docker push $IMAGE_NAME
 
-        # - name: 'Deploy to Azure Container Instances'
-        #   uses: 'azure/aci-deploy@v1'
-        #   with:
-        #     resource-group: ${{ secrets.RESOURCE_GROUP }}
-        #     dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
-        #     image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
-        #     registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        #     registry-username: ${{ secrets.REGISTRY_USERNAME }}
-        #     registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-        #     name: aci-sampleapp
-        #     location: 'west us'
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: ${{ secrets.RESOURCE_GROUP }}
+            dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: aci-sampleapp
+            location: 'west us'
