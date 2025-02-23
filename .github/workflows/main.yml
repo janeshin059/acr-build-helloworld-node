@@ -26,22 +26,6 @@ jobs:
         - name: Scan the image
           run: ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
         
-
-        # - name: Run Checkov action
-        #   id: checkov
-        #   uses: bridgecrewio/checkov-action@master
-        #   with:
-        #     quiet: true # optional: display only failed checks
-        #     soft_fail: true # optional: do not return an error code if there are failed checks
-        #     log_level: DEBUG # optional: set log level. Default WARNING
-        #     docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
-        #     dockerfile_path: Dockerfile # path to the Dockerfile
-        #     # container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
-        #     api-key: ${{ secrets.BC_API_KEY }} # Bridgecrew API key stored as a GitHub secret
-        #   env:
-        #     PRISMA_API_URL: https://api4.prismacloud.io
-
-
         - name: 'Login via Azure CLI'
           uses: azure/login@v1
           with:
@@ -56,14 +40,14 @@ jobs:
         - run: |
             docker push $IMAGE_NAME
 
-        - name: 'Deploy to Azure Container Instances'
-          uses: 'azure/aci-deploy@v1'
-          with:
-            resource-group: ${{ secrets.RESOURCE_GROUP }} 
-            dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
-            image: ${{ env.IMAGE_NAME }}
-            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-            registry-username: ${{ secrets.REGISTRY_USERNAME }}
-            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-            name: aci-sampleapp
-            location: 'korea central'
+        # - name: 'Deploy to Azure Container Instances'
+        #   uses: 'azure/aci-deploy@v1'
+        #   with:
+        #     resource-group: ${{ secrets.RESOURCE_GROUP }} 
+        #     dns-name-label: ${{ secrets.RESOURCE_GROUP }}${{ github.run_number }}
+        #     image: ${{ env.IMAGE_NAME }}
+        #     registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        #     registry-username: ${{ secrets.REGISTRY_USERNAME }}
+        #     registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+        #     name: aci-sampleapp
+        #     location: 'korea central'
