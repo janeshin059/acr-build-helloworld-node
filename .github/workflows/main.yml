@@ -40,13 +40,11 @@ jobs:
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
 
-        - name: Build and Scan the image
-          # env:
-          #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          #   IMAGE_TAG: ${{ github.sha }}
-          run: |
-            docker build -t $IMAGE_NAME .
-            ./twistcli images scan --address $PCC_CONSOLE --user $USER --password $PASS --details $IMAGE_NAME
+        - name: Build the image
+          run: docker build -t $IMAGE_NAME .
+          
+        - name: Scan the image
+          run: ./twistcli images scan --address $PCC_CONSOLE --user $USER --password $PASS --details $IMAGE_NAME
 
         - name: Run Checkov action
           id: checkov
