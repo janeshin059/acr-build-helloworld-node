@@ -26,9 +26,9 @@ jobs:
 
         - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
           run: |
-            curl --insecure --user janeshin059@gmail.com:Paloalto1! --output ./twistcli https://app.sg.prismacloud.io/api/v1/util/twistcli
+            curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
             chmod a+x ./twistcli
-            
+
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
@@ -53,7 +53,7 @@ jobs:
             # container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
             api-key: ${{ secrets.BC_API_KEY }} # Bridgecrew API key stored as a GitHub secret
           env:
-            PRISMA_API_URL: https://api.sg.prismacloud.io
+            PRISMA_API_URL: https://api4.prismacloud.io
 
 
         - name: Push the image to Amazon ECR
