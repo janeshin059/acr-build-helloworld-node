@@ -39,6 +39,7 @@ jobs:
           #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           #   IMAGE_TAG: ${{ github.sha }}
           run: |
+          
             docker build -t $IMAGE_NAME .
             ./twistcli images scan --address https://app.sg.prismacloud.io --user janeshin059@gmail.com --password Paloalto1! --details $IMAGE_NAME
         
