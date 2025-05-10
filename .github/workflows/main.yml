@@ -26,10 +26,10 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
 
-        # - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
-        #   run: |
-        #     curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
-        #     chmod a+x ./twistcli
+        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
+          run: |
+            curl -v "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \ -H "x-xdr-auth-id: 15" \ -H "Authorization: qSBzX6BJEyROGQDa3NmtpTzBQqXCT4EoGkGjtPusONe7JQWWkCO0hwv5cjxJzNBwG20cdDpZhIZ8Ox9aPCEQtxcvbjKtgSYQOj0fCtawfCp93uyZUZtevXUTAsnH9g4T" \ | jq -r ".signed_url"
+            chmod +x cortexcli
 
         - name: Login to Amazon ECR
           id: login-ecr
