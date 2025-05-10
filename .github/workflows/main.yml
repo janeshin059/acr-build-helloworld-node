@@ -8,7 +8,9 @@ env:
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
   IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
-
+  API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64
+  API_KEY: 15
+  API_KEY_ID: qSBzX6BJEyROGQDa3NmtpTzBQqXCT4EoGkGjtPusONe7JQWWkCO0hwv5cjxJzNBwG20cdDpZhIZ8Ox9aPCEQtxcvbjKtgSYQOj0fCtawfCp93uyZUZtevXUTAsnH9g4T
 jobs:
     build-and-scan-deploy:
         runs-on: ubuntu-latest
@@ -24,10 +26,10 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
 
-        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
-          run: |
-            curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
-            chmod a+x ./twistcli
+        # - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
+        #   run: |
+        #     curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
+        #     chmod a+x ./twistcli
 
         - name: Login to Amazon ECR
           id: login-ecr
@@ -39,8 +41,9 @@ jobs:
           #   IMAGE_TAG: ${{ github.sha }}
           run: |
             docker build -t $IMAGE_NAME .
-            ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
-
+            docker save $IMAGE_NAME > dockerimage.tar
+            ./cortexcli --api-base-url ${{ env.API_URL }} --api-key ${{ env.API_KEY }} --xdr-api-id ${{ env.API_KEY_ID }} image scan dockerimage.tar
+    
 
         - name: Push the image to Amazon ECR
           id: build-image
