@@ -29,9 +29,11 @@ jobs:
         - name: Download CortexCLI from the CC Console # using CC Scan
           run: |
             
-            curl -s -o cortexcli.pkg $(curl -s "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=darwin&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url") 
-# chmod +x cortexcli
+       
+            curl -s -o cortexcli $(curl -s "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url") 
+            chmod +x cortexcli
 # curl -v "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \ -H "x-xdr-auth-id: 15" \ -H "Authorization: ${{env.API_KEY}}" \ | jq -r ".signed_url"
+#curl -s -o cortexcli.pkg $(curl -s "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=darwin&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url") 
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
@@ -43,8 +45,8 @@ jobs:
           run: |
             docker build -t $IMAGE_NAME .
             docker save $IMAGE_NAME > dockerimage.tar
+
             ./cortexcli --api-base-url ${{ env.API_URL }} --api-key ${{ env.API_KEY }} --api-key-id ${{ env.API_KEY_ID }} image scan dockerimage.tar
-    
         - name: Push the image to Amazon ECR
           id: build-image
           run: |
