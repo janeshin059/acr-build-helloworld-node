@@ -8,7 +8,7 @@ env:
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
   IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
-  API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64
+  API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com
   API_KEY_ID: 34
   API_KEY: H5rmQ8E7xQl0uN5kcBbPGgdlPsXB5nqljBe9VBrqFVICoIHOO3bqymszBliK8cfvxX1gIUCtRGLQ3jNLPFBlvsRW65ZGPQpxBhNpSx5imawo9IXtenMOGyq9Gv9uQZIe
 jobs:
@@ -47,9 +47,9 @@ jobs:
             docker save $IMAGE_NAME > dockerimage.tar
 
             ./cortexcli \
+            --api-base-url ${{ env.API_URL }} \
             --api-key ${{ env.API_KEY }} \
             --api-key-id ${{ env.API_KEY_ID }} \
-            --api-base-url ${{ env.API_URL }} \
             image scan dockerimage.tar
         - name: Push the image to Amazon ECR
           id: build-image
