@@ -9,8 +9,8 @@ env:
   # IMAGE_TAG: ${{ github.sha }}
   IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
   API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64
-  API_KEY: 15
-  API_KEY_ID: qSBzX6BJEyROGQDa3NmtpTzBQqXCT4EoGkGjtPusONe7JQWWkCO0hwv5cjxJzNBwG20cdDpZhIZ8Ox9aPCEQtxcvbjKtgSYQOj0fCtawfCp93uyZUZtevXUTAsnH9g4T
+  API_KEY: 32
+  API_KEY_ID: LVrVqkkdnBjqxuhd8PlKoui1ISXLKkMfpmZFqvuWjQnvDQoM6wewi4nySjZl51U81fFeHBEyMqSvIvhNU7bYq6lyiMm7LnNVEe6V51GSuJamVt7m63ROZ4qh8NVnaTK0
 jobs:
     build-and-scan-deploy:
         runs-on: ubuntu-latest
@@ -26,9 +26,9 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
 
-        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
+        - name: Download CortexCLI from the CC Console # using CC Scan
           run: |
-            curl -v "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \ -H "x-xdr-auth-id: 15" \ -H "Authorization: qSBzX6BJEyROGQDa3NmtpTzBQqXCT4EoGkGjtPusONe7JQWWkCO0hwv5cjxJzNBwG20cdDpZhIZ8Ox9aPCEQtxcvbjKtgSYQOj0fCtawfCp93uyZUZtevXUTAsnH9g4T" \ | jq -r ".signed_url"
+            curl -v "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \ -H "x-xdr-auth-id: 15" \ -H "Authorization: ${{env.API_KEY_ID}}" \ | jq -r ".signed_url"
             chmod +x cortexcli
 
         - name: Login to Amazon ECR
@@ -44,10 +44,8 @@ jobs:
             docker save $IMAGE_NAME > dockerimage.tar
             ./cortexcli --api-base-url ${{ env.API_URL }} --api-key ${{ env.API_KEY }} --xdr-api-id ${{ env.API_KEY_ID }} image scan dockerimage.tar
     
-
         - name: Push the image to Amazon ECR
           id: build-image
           run: |
             docker push $IMAGE_NAME
 
-          #test
