@@ -46,7 +46,7 @@ jobs:
             docker build -t $IMAGE_NAME .
             docker save $IMAGE_NAME > dockerimage.tar
 
-            ./cortexcli \ 
+            ./cortexcli \
             --api-base-url ${{ env.API_URL }} \
             --api-key ${{ env.API_KEY }} \
             --api-key-id ${{ env.API_KEY_ID }} \
