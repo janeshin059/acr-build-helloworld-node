@@ -30,7 +30,7 @@ jobs:
           run: |
             
             curl -s -o cortexcli.pkg $(curl -s "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=darwin&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url") 
-            chmod +x cortexcli
+# chmod +x cortexcli
 # curl -v "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \ -H "x-xdr-auth-id: 15" \ -H "Authorization: ${{env.API_KEY}}" \ | jq -r ".signed_url"
         - name: Login to Amazon ECR
           id: login-ecr
