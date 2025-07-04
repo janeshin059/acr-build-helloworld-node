@@ -47,9 +47,9 @@ jobs:
             docker save $IMAGE_NAME > dockerimage.tar
 
             ./cortexcli \
-            --api-base-url ${{ env.API_URL }} \
             --api-key ${{ env.API_KEY }} \
             --api-key-id ${{ env.API_KEY_ID }} \
+            --api-base-url ${{ env.API_URL }} \
             image scan dockerimage.tar
         - name: Push the image to Amazon ECR
           id: build-image
