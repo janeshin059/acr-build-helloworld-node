@@ -8,9 +8,7 @@ env:
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
   IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
-  API_URL: https://api-japac-cxsiamp.xdr.jp.paloaltonetworks.com
-  API_KEY_ID: 20
-  API_KEY: kDHvAClx03jQbx1Bsi56tSVZhxo4eXHTQ817fVGVEeelaSJCe4elUe7iWM1MfuIoxXuGdB5Tsc0t3jgmy6v8WC4vdsAgs1SobSYELmBxIi2Q4qyMZjUXDmKxYbHvs7hd
+
 jobs:
     build-and-scan-deploy:
         runs-on: ubuntu-latest
@@ -26,13 +24,11 @@ jobs:
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: ${{ env.AWS_REGION }}
 
-        - name: Download CortexCLI from the CC Console # using CC Scan
+        - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
           run: |
-            curl -s -o cortexcli $(curl -s "https://api-japac-cxsiamp.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url")
-            chmod +x cortexcli
-# curl -s -o cortexcli $(curl -s "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url") 
-# curl -v "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \ -H "x-xdr-auth-id: 15" \ -H "Authorization: ${{env.API_KEY}}" \ | jq -r ".signed_url"
-#curl -s -o cortexcli.pkg $(curl -s "https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=darwin&architecture=amd64" -H "x-xdr-auth-id: ${{env.API_KEY_ID}}" -H "Authorization: ${{env.API_KEY}}" | jq -r ".signed_url") 
+            curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
+            chmod a+x ./twistcli
+
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
@@ -43,15 +39,26 @@ jobs:
           #   IMAGE_TAG: ${{ github.sha }}
           run: |
             docker build -t $IMAGE_NAME .
-            docker save $IMAGE_NAME > dockerimage.tar
+            ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
 
-            ./cortexcli \
-            --api-base-url ${{ env.API_URL }} \
-            --api-key ${{ env.API_KEY }} \
-            --api-key-id ${{ env.API_KEY_ID }} \
-            image scan dockerimage.tar
+        - name: Run Checkov action
+          id: checkov
+          uses: bridgecrewio/checkov-action@master
+          with:
+            quiet: true # optional: display only failed checks
+            soft_fail: true # optional: do not return an error code if there are failed checks
+            log_level: DEBUG # optional: set log level. Default WARNING
+            docker_image: ${{ env.IMAGE_NAME }} # define the name of the image to scan
+            dockerfile_path: Dockerfile # path to the Dockerfile
+            # container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
+            api-key: ${{ secrets.BC_API_KEY }} # Bridgecrew API key stored as a GitHub secret
+          env:
+            PRISMA_API_URL: https://api4.prismacloud.io
+
+
         - name: Push the image to Amazon ECR
           id: build-image
           run: |
             docker push $IMAGE_NAME
 
+          #test
