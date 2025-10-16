@@ -45,3 +45,5 @@ jobs:
           id: build-image
           run: |
             docker push $IMAGE_NAME
+
+    #test:
