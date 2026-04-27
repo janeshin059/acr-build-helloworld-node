@@ -31,6 +31,16 @@ jobs:
         #     curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
         #     chmod a+x ./twistcli
 
+        - name: Download cortexcli
+          run: |
+            set -x
+            crtx_resp=$(curl "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
+            -H "x-xdr-auth-id: ${CORTEX_API_KEY_ID}" \
+            -H "Authorization: ${CORTEX_API_KEY}")
+            crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
+            curl -o cortexcli $crtx_url
+            chmod +x cortexcli
+            ./cortexcli --version
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
