@@ -8,7 +8,7 @@ env:
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
   IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
-  API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64
+  API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com
   API_KEY: 15
   API_KEY_ID: qSBzX6BJEyROGQDa3NmtpTzBQqXCT4EoGkGjtPusONe7JQWWkCO0hwv5cjxJzNBwG20cdDpZhIZ8Ox9aPCEQtxcvbjKtgSYQOj0fCtawfCp93uyZUZtevXUTAsnH9g4T
 jobs:
@@ -34,9 +34,9 @@ jobs:
         - name: Download cortexcli
           run: |
             set -x
-            crtx_resp=$(curl "${{ env.API_URL }}" \
-            -H "x-xdr-auth-id: ${{ env.API_KEY_ID }}" \
-            -H "Authorization: ${{ env.API_KEY }}")
+            crtx_resp=$(curl "${API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
+            -H "x-xdr-auth-id: ${API_KEY_ID}" \
+            -H "Authorization: ${API_KEY}")
             crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
             curl -o cortexcli $crtx_url
             chmod +x cortexcli
@@ -115,41 +115,41 @@ jobs:
 #           --create-repo-if-missing
 
 
-    # build-and-scan-deploy:
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #     # checkout the repo
-    #     - name: 'Checkout GitHub Action'
-    #       uses: actions/checkout@main
+#     build-and-scan-deploy:
+#         runs-on: ubuntu-latest
+#         steps:
+#         # checkout the repo
+#         - name: 'Checkout GitHub Action'
+#           uses: actions/checkout@main
 
-    #     - name: Configure AWS credentials
-    #       uses: aws-actions/configure-aws-credentials@v1
-    #       with:
-    #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #         aws-region: ${{ env.AWS_REGION }}
+#         - name: Configure AWS credentials
+#           uses: aws-actions/configure-aws-credentials@v1
+#           with:
+#             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#             aws-region: ${{ env.AWS_REGION }}
 
-    #     - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
-    #       run: |
-    #         curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
-    #         chmod a+x ./twistcli
+#         - name: Download twistcli from the Prisma Cloud Compute Console # using Twistcli scan
+#           run: |
+#             curl --insecure --user ${{ secrets.PCC_USER }}:${{ secrets.PCC_PASS }} --output ./twistcli ${{ secrets.PCC_CONSOLE_URL }}/api/v1/util/twistcli
+#             chmod a+x ./twistcli
 
 
-    #     - name: Login to Amazon ECR
-    #       id: login-ecr
-    #       uses: aws-actions/amazon-ecr-login@v1
+#         - name: Login to Amazon ECR
+#           id: login-ecr
+#           uses: aws-actions/amazon-ecr-login@v1
 
-    #     - name: Build and Scan the image
-    #       # env:
-    #       #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #       #   IMAGE_TAG: ${{ github.sha }}
-    #       run: |
-    #         docker build -t $IMAGE_NAME .
-    #         ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
+#         - name: Build and Scan the image
+#           # env:
+#           #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#           #   IMAGE_TAG: ${{ github.sha }}
+#           run: |
+#             docker build -t $IMAGE_NAME .
+#             ./twistcli images scan --address ${{ secrets.PCC_CONSOLE_URL }} --user ${{ secrets.PCC_USER }} --password ${{ secrets.PCC_PASS }} --details $IMAGE_NAME
 
-    #     - name: Push the image to Amazon ECR
-    #       id: build-image
-    #       run: |
-    #         docker push $IMAGE_NAME
+#         - name: Push the image to Amazon ECR
+#           id: build-image
+#           run: |
+#             docker push $IMAGE_NAME
     
 
