@@ -50,7 +50,7 @@ jobs:
           run: |
             docker build -t $IMAGE_NAME .
             # docker save $IMAGE_NAME > dockerimage.tar
-            ./cortexcli --upload-mode upload --api-base-url ${{ env.API_URL }} --api-key ${{ env.API_KEY }} --api-key-id ${{ env.API_KEY_ID }} image scan $IMAGE_NAME
+            ./cortexcli --upload-mode upload --api-base-url ${{ env.API_URL }} --api-key ${{ env.API_KEY }} --api-key-id ${{ env.API_KEY_ID }} image scan $IMAGE_NAME --log
     
 
         - name: Push the image to Amazon ECR
