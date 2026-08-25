@@ -8,9 +8,12 @@ env:
   ECR_REGISTRY: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com
   # IMAGE_TAG: ${{ github.sha }}
   IMAGE_NAME: 022499044118.dkr.ecr.ap-northeast-2.amazonaws.com/aws-webapp:${{ github.sha }}
-  API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com
-  API_KEY: ${{ secrets.API_KEY }}
-  API_KEY_ID: ${{ secrets.API_KEY_ID }}
+  # API_URL: https://api-japac-ccr.xdr.jp.paloaltonetworks.com
+  API_URL: https://api-jashin.xdr.kr.paloaltonetworks.com
+  # API_KEY: ${{ secrets.API_KEY }}
+  # API_KEY_ID: ${{ secrets.API_KEY_ID }}
+  API_KEY: "91A6BHBr1sKLqz1cuvrqElR0Wh85sGuv3D3LVvxmbcBrxRM6iALbhBcCU7Ey3AlO04XABwmC2jdpIjwZ5jLDeZHhU6bk9wlrxJIEzHT6i9aY76NhRqTohyaCtw70F4gC"
+  API_KEY_ID: 26
 jobs:
     build-and-scan-deploy:
         runs-on: ubuntu-latest
