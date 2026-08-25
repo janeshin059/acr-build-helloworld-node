@@ -54,7 +54,7 @@ jobs:
             ./cortexcli --api-base-url ${{ env.API_URL }} --api-key ${{ env.API_KEY }} --api-key-id ${{ env.API_KEY_ID }} image scan $IMAGE_NAME --upload-mode upload 
     
 
-        - name: Push the image to Amazon ECR
-          id: build-image
-          run: |
-            docker push $IMAGE_NAME
+        # - name: Push the image to Amazon ECR
+        #   id: build-image
+        #   run: |
+        #     docker push $IMAGE_NAME
